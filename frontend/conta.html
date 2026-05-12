@@ -5,8 +5,117 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>account</title>
 </head>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Angkor&family=Badeen+Display&family=Danfo&family=MuseoModerno:ital,wght@0,100..900;1,100..900&display=swap');
+
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: flexbox; 
+    justify-content: center;
+    align-items: center;
+    background: #01501f; 
+    font-family: "MuseoModerno"; 
+    font-weight: bolder;
+    color: #fff; 
+}
+
+.dropdown{
+    display: inline-block;
+    position: relative;
+    padding: 10px;
+    margin: 0px;
+}
+
+.dropdown button{
+    background-color: rgb(0, 160, 0);
+    color: white;
+    margin: 0px;
+    padding: 5px;
+    border: none;
+    cursor: pointer;
+    max-width: 150px;
+    min-width: 60px;
+    height: 5vh;
+    border-bottom-right-radius: 15px;
+    border-top-right-radius: 1em;
+}
+
+.dropdown a{
+    display: block;
+    color: black;
+    text-decoration: none;
+    padding: 10px 15px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.dropdown .menu{
+    display: none;
+    position: absolute;
+    background-color: rgb(4, 155, 7);
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    border-top-right-radius: 1em;
+    min-width: 50px;
+    box-shadow: 2px 3px 5px rgb(23, 92, 23);
+}
+.dropdown:hover .menu{
+    display:block;
+}
+
+.dropdown:hover button{
+    background-color:  rgb(1, 44, 1);
+}
+
+.dropdown  a:hover{
+    background-color: rgb(0, 100, 32);
+    border-radius: 1.1em;
+    box-shadow: 3px 3px 5px rgb(8, 47, 8);
+    color: white;
+    transform: scale(1.05);
+    font-size: 1.1em;
+
+}  
+
+.container{
+    padding: 10px 20px;
+    margin: 20px;
+    display: flexbox;
+    border-radius: 1.2em;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-width: auto;
+    max-width: 40vw;
+    min-height: auto;
+    max-height: 70vh;
+    background-color: lightgreen
+    ;
+}
+</style>
 <body>
+<header>
+    <div class="dropdown">
+        <button>
+            <img src="/logos_google/menu_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg" alt="">
+        </button>
+        <div class="menu">
+            <a href="/trabalhos/tde2.0/frontend/conta.html"> <img src="/trabalhos/tde2.0/logos_google/person_24dp_FFFFFF_FILL0_wght400_GRAD0_opsz24.svg" alt="Conta"></a>
+            <a href="/trabalhos/tde2.0/frontend/achivments.html"> <img src="/logos_google/star_24dp_FFFFFF_FILL0_wght400_GRAD0_opsz24.svg" alt="Conquistas"></a>
+            <a href="/trabalhos/tde2.0/frontend/teste.html"> <img src="/trabalhos/tde2.0/logos_google/book_24dp_FFFFFF_FILL0_wght400_GRAD0_opsz24.svg" alt="teste"></a>
+            <a href="/trabalhos/tde2.0/pomodoro/pomodoro.html"> <img src="/trabalhos/tde2.0/logos_google/home_24dp_FFFFFF_FILL0_wght400_GRAD0_opsz24.svg" alt="Pomodoro"></a>
+        </div>
+    </div>
+
+</header>
+<div class="container">
     <h1>Conta</h1>
     <p>Bem-vindo à sua conta!</p>
+    
+</div>
 </body>
 </html>
