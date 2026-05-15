@@ -7,7 +7,7 @@
 }
 h1 {
     font-family: "MuseoModerno"; 
-    font-weight: bolder;
+    font-weight: bolder; 
     color: #fff; 
     font-size: 3em;
     padding: 0px;
@@ -18,7 +18,7 @@ body {
     display: flexbox; 
     justify-content: center;
     align-items: center;
-    background: #01501f; 
+    background-color: #E2FFDF;
     font-family: "MuseoModerno"; 
     font-weight: bolder;
     color: #fff; 
@@ -38,8 +38,8 @@ body {
 .dropdown button{
     position: absolute;
     top: 10px;
-    left: 0px;
-    background-color: rgb(0, 160, 0);
+    left: 10px;
+    background-color: #287B4D;
     color: white;
     margin: 0px;
     padding: 5px;
@@ -47,9 +47,9 @@ body {
     cursor: pointer;
     max-width: 150px;
     min-width: 60px;
-    height: 5vh;
-    border-bottom-right-radius: 15px;
-    border-top-right-radius: 1em;
+    min-height: 60px;
+    max-height: 150px;
+    border-radius: 50%;
 }
 
 .dropdown a{
@@ -62,13 +62,10 @@ body {
 
 .dropdown .menu{
     display: none;
-    position: absolute;
-    top: 50px;
-    left: 0px;
-    background-color: rgb(4, 155, 7);
-    border-bottom-left-radius: 15px;
-    border-bottom-right-radius: 15px;
-    border-top-right-radius: 1em;
+    position: fixed;
+    top: 70px;
+    background-color: #287B4D;
+    border-radius: 20px;
     min-width: 50px;
     box-shadow: 2px 3px 5px rgb(23, 92, 23);
 
@@ -102,40 +99,45 @@ body {
     min-height: auto;
     max-height: 30vh;
     text-align: center; 
-    background: #4fb04d; 
+    background-color: #49BA65;
     padding: 30px; 
     border-radius: 10px; 
     box-shadow: 0 0 15px rgba(5, 27, 11, 0.5); 
 }
 
 h1 {
-    margin-bottom: 20px; 
+    margin-bottom: 10px; 
+    padding: 5px;
 }
 
 #timer {
-    font-size: 48px; 
-    margin: 20px 0; 
+    font-size: 65px; 
+    margin: 5px 0px; 
 }
 
 .container button {
     padding: 10px 15px; 
     margin: 5px; 
-    border: none; 
-    border-radius: 5em; 
+    border: none;
+    min-width: 50px;
+    max-width: 150px;
+    min-height: 50px;
+    max-height: 150px; 
+    border-radius: 50%; 
     cursor: pointer; 
     font-size: 16px; 
 }
 
-.start { background: #003202; border-radius: 7em;  } 
-.pause { background: #003202; border-radius: 7em; } 
-.reset { background: #003202; border-radius: 7em; } 
+.start { background: #003202; border-radius: 50%;  } 
+.pause { background: #003202; border-radius: 50%; } 
+.reset { background: #003202; border-radius: 50%; } 
 
 .container button{
     transition: transform 0.3s ease-in-out;
 }
 
 .container button:hover {
-    background: #002001; 
+    background: #006004; 
     transform: scale(1.1);
 }
 

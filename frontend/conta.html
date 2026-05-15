@@ -10,30 +10,44 @@
 @import url('https://fonts.googleapis.com/css2?family=Angkor&family=Badeen+Display&family=Danfo&family=MuseoModerno:ital,wght@0,100..900;1,100..900&display=swap');
 
 
-* {
-    margin: 0;
-    padding: 0;
+h1 {
+    font-family: "MuseoModerno"; 
+    font-weight: bolder; 
+    color: #fff; 
+    font-size: 3em;
+    padding: 0px;
+    margin: 0px;
 }
 
 body {
-    display: flexbox; 
+    margin: 0;
+    display: flex;
     justify-content: center;
     align-items: center;
-    background: #01501f; 
+
+    background-color: #E2FFDF;
+
     font-family: "MuseoModerno"; 
     font-weight: bolder;
-    color: #fff; 
+
+    height: 100vh;
 }
 
 .dropdown{
     display: inline-block;
-    position: relative;
+    position: fixed;
+    left: 0px;
+    top: 0px;
     padding: 10px;
     margin: 0px;
+    
 }
 
 .dropdown button{
-    background-color: rgb(0, 160, 0);
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: #287B4D;
     color: white;
     margin: 0px;
     padding: 5px;
@@ -41,9 +55,9 @@ body {
     cursor: pointer;
     max-width: 150px;
     min-width: 60px;
-    height: 5vh;
-    border-bottom-right-radius: 15px;
-    border-top-right-radius: 1em;
+    min-height: 60px;
+    max-height: 150px;
+    border-radius: 50%;
 }
 
 .dropdown a{
@@ -57,12 +71,14 @@ body {
 .dropdown .menu{
     display: none;
     position: absolute;
-    background-color: rgb(4, 155, 7);
-    border-bottom-left-radius: 15px;
-    border-bottom-right-radius: 15px;
-    border-top-right-radius: 1em;
+    top: 60px;
+    left: 10px;
+    background-color: #287B4D;
+    border-radius: 20px;
     min-width: 50px;
     box-shadow: 2px 3px 5px rgb(23, 92, 23);
+
+    z-index: 10;
 }
 .dropdown:hover .menu{
     display:block;
@@ -82,20 +98,23 @@ body {
 
 }  
 
-.container{
-    padding: 10px 20px;
-    margin: 20px;
-    display: flexbox;
-    border-radius: 1.2em;
-    flex-direction: column;
+.container {
+    position: absolute;
+    display: grid;
     justify-content: center;
     align-items: center;
-    min-width: auto;
-    max-width: 40vw;
-    min-height: auto;
-    max-height: 70vh;
-    background-color: lightgreen
-    ;
+    text-align: center; 
+
+    padding: 30px; 
+    min-width: 20vw;
+    max-width: 50vw;
+    min-height: 20vh;
+    max-height: 50vh;
+
+
+    background-color: #49BA65;
+    border-radius: 10px; 
+    box-shadow: 0 0 15px rgba(5, 27, 11, 0.5); 
 }
 </style>
 <body>
@@ -113,6 +132,7 @@ body {
         </div>
 
 </header>
+
 <div class="container">
     <h1>Conta</h1>
     <p>Bem-vindo à sua conta!</p>

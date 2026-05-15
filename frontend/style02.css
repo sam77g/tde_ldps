@@ -23,10 +23,20 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  /*background-image: url(/trabalhos/tde2.0/frontend/backgroun_ldps.png);
-  background-size: cover;*/
-  background: #1eaf7e;
-  font-family: museo moderno, angkor, roboto, sans-serif;
+
+  background: linear-gradient(-45deg, #52eee4, #abe73c, #08743e, #23d5a5);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+
+  font-family: "museo moderno";
+
+
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
  
 /* CONTAINER */
