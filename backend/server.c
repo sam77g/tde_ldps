@@ -11,7 +11,7 @@
 #include <openssl/sha.h>
 #include <curl/curl.h>
 
-#define GROQ_KEY "Bearer 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"
+const char *groq_key = getenv("GROQ_API_KEY");
 #define PORT        8080
 #define DB_FILE     "pomodoro.db"
 #define MAX_BODY    524288
@@ -99,7 +99,6 @@ static char *rota_groq_ia(const char *body) {
     headers = curl_slist_append(headers, "Content-Type: application/json");
     
     // Configura a sua nova chave limpa sem as chaves {} que vieram no texto
-    headers = curl_slist_append(headers, "Authorization: Bearer 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");
 
     curl_easy_setopt(curl, CURLOPT_URL, "https://api.groq.com/openai/v1/chat/completions");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
