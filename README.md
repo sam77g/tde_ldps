@@ -150,6 +150,7 @@ make \
 libsqlite3-dev \
 libmicrohttpd-dev \
 libssl-dev
+```
 
 ### 1. Clonar o Repositório
 
