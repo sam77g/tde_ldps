@@ -1,80 +1,85 @@
 /*
- * server.js — Backend Pomodoro + Groq IA (porta do server.c para Node.js/Express)
+ * server.js — Backend Pomodoro + Groq IA (PostgreSQL Edition)
  *
- * Mantém EXATAMENTE as mesmas rotas, formatos de entrada/saída do backend original,
- * para que o frontend (script02.js, pomodoro.js) continue funcionando sem nenhuma alteração.
+ * Mantém EXATAMENTE as mesmas rotas e formatos de entrada/saída do original,
+ * mas agora utiliza PostgreSQL (Supabase) para persistência definitiva no Render.
  *
- * Agora atualizado com criptografia de senhas robusta via PBKDF2 + Salt.
- *
- * Instalar:   npm install express cors better-sqlite3
- * Executar:   npm start   (ou: node server.js)
+ * Instalar antes: npm install express cors pg
  */
 
 const express = require("express");
 const cors = require("cors");
 const crypto = require("crypto");
-const Database = require("better-sqlite3");
+const { Client } = require("pg"); // Alterado de better-sqlite3 para pg
 
 const PORT = process.env.PORT || 3000;
-const DB_FILE = "pomodoro.db";
 
-// Mesma chave usada no proxy de IA do server.c
+// Configuração da conexão com o banco de dados remoto
+// Em produção, o Render vai preencher process.env.DATABASE_URL automaticamente
+const db = new Client({
+  connectionString: process.env.DATABASE_URL || "postgres://usuario:senha@localhost:5432/nome_do_banco",
+  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false // Ativa SSL apenas em produção
+});
+
+// Conecta ao banco de dados remoto
+db.connect()
+  .then(() => console.log("[DATABASE] Conectado ao PostgreSQL com sucesso!"))
+  .catch(err => console.error("[DATABASE] Erro ao conectar ao PostgreSQL:", err));
+
+// Inicialização das tabelas usando sintaxe válida do PostgreSQL
+const inicializarTabelas = async () => {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS usuarios (
+        id SERIAL PRIMARY KEY,
+        nome TEXT NOT NULL,
+        email TEXT NOT NULL UNIQUE,
+        senha TEXT NOT NULL
+      );
+    `);
+
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS sessoes (
+        id SERIAL PRIMARY KEY,
+        usuario_id INTEGER NOT NULL,
+        duracao_seg INTEGER NOT NULL,
+        criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log("[DATABASE] Tabelas verificadas/criadas.");
+  } catch (err) {
+    console.error("[DATABASE] Erro ao criar tabelas:", err);
+  }
+};
+inicializarTabelas();
+
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
-// ── Funções de Criptografia Segura (PBKDF2 + Salt) ──────────────────
-
-// Gera um hash robusto e lento, protegendo as senhas dos alunos contra força bruta
+// ── Funções de Criptografia (PBKDF2 + Salt) ──────────────────
 function gerarHashSenha(senhaPura) {
-  // Cria um "salt" aleatório único de 16 bytes convertido para hexadecimal
   const salt = crypto.randomBytes(16).toString("hex");
-  // Executa o PBKDF2: aplica SHA-512 por 1000 iterações para tornar o processo computacionalmente pesado para invasores
   const hash = crypto.pbkdf2Sync(senhaPura, salt, 1000, 64, "sha512").toString("hex");
-  // Retorna o salt e o hash gerados unidos por ":"
   return `${salt}:${hash}`;
 }
 
-// Verifica se a senha digitada no login bate com a criptografia salva no banco
 function verificarSenha(senhaDigitada, senhaArmazenada) {
   try {
-    // Separa o salt original e o hash correspondente
     const [salt, hashOriginal] = senhaArmazenada.split(":");
-    // Recria o hash a partir da senha fornecida usando o mesmo salt gerado no cadastro
     const hashDigitado = crypto.pbkdf2Sync(senhaDigitada, salt, 1000, 64, "sha512").toString("hex");
     return hashOriginal === hashDigitado;
   } catch (err) {
-    return false; // Retorna falso caso o formato da string armazenada seja inválido (ex: hashes antigos)
+    return false;
   }
 }
 
-// ── banco de dados ──────────────────────────────────────────
-const db = new Database(DB_FILE);
-
-db.exec(`
-  CREATE TABLE IF NOT EXISTS usuarios (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nome TEXT NOT NULL,
-    email TEXT NOT NULL UNIQUE,
-    senha TEXT NOT NULL
-  );
-`);
-
-db.exec(`
-  CREATE TABLE IF NOT EXISTS sessoes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    usuario_id INTEGER NOT NULL,
-    duracao_seg INTEGER NOT NULL,
-    criado_em TEXT DEFAULT (datetime('now'))
-  );
-`);
-
 // ── app ──────────────────────────────────────────────────────
 const app = express();
-app.use(cors()); // equivalente a Access-Control-Allow-Origin: *
+app.use(cors());
 app.use(express.json());
 
-// ── rota: cadastro ──────────────────────────────────────────
-app.post("/cadastro", (req, res) => {
+// ── rota: cadastro (Assíncrona) ──────────────────────────────
+app.post("/cadastro", async (req, res) => {
   const { nome, email, senha } = req.body || {};
 
   if (!nome || !email || !senha) {
@@ -82,22 +87,23 @@ app.post("/cadastro", (req, res) => {
   }
 
   try {
-    // 🚨 ALTERAÇÃO: Gera o hash seguro com Salt + PBKDF2 em vez do SHA256 puro
     const senhaHashSegura = gerarHashSenha(senha);
     
-    const stmt = db.prepare(
-      "INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?);"
+    // Sintaxe do Postgres usa $1, $2, $3 em vez de ?
+    await db.query(
+      "INSERT INTO usuarios (nome, email, senha) VALUES ($1, $2, $3);",
+      [nome, email, senhaHashSegura]
     );
-    stmt.run(nome, email, senhaHashSegura);
+    
     return res.json({ ok: true, msg: "Conta criada!" });
   } catch (err) {
-    // ex: e-mail duplicado (UNIQUE constraint)
+    // Código de erro do Postgres para violação de UNIQUE (e-mail duplicado) é '23505'
     return res.json({ ok: false, msg: "Erro ou email duplicado" });
   }
 });
 
-// ── rota: login ──────────────────────────────────────────────
-app.post("/login", (req, res) => {
+// ── rota: login (Assíncrona) ──────────────────────────────────
+app.post("/login", async (req, res) => {
   const { email, senha } = req.body || {};
 
   if (!email || !senha) {
@@ -105,12 +111,13 @@ app.post("/login", (req, res) => {
   }
 
   try {
-    // 🚨 ALTERAÇÃO: Busca o usuário apenas pelo e-mail primeiro
-    const row = db
-      .prepare("SELECT id, nome, senha FROM usuarios WHERE email = ? LIMIT 1;")
-      .get(email);
+    const result = await db.query(
+      "SELECT id, nome, senha FROM usuarios WHERE email = $1 LIMIT 1;",
+      [email]
+    );
 
-    // 🚨 ALTERAÇÃO: Usa o utilitário nativo para validar os hashes com salt de forma segura
+    const row = result.rows[0]; // No pg, os dados ficam dentro de .rows
+
     if (row && verificarSenha(senha, row.senha)) {
       return res.json({ ok: true, id: row.id, nome: row.nome });
     }
@@ -121,41 +128,50 @@ app.post("/login", (req, res) => {
   }
 });
 
-// ── rota: salvar sessão de estudo ────────────────────────────
-app.post("/salvar_sessao", (req, res) => {
+// ── rota: salvar sessão de estudo (Assíncrona) ────────────────
+app.post("/salvar_sessao", async (req, res) => {
   const { usuario_id, duracao_seg } = req.body || {};
 
   if (usuario_id === undefined || duracao_seg === undefined) {
     return res.json({ ok: false });
   }
 
-  const stmt = db.prepare(
-    "INSERT INTO sessoes (usuario_id, duracao_seg) VALUES (?, ?);"
-  );
-  stmt.run(parseInt(usuario_id, 10), parseInt(duracao_seg, 10));
-  return res.json({ ok: true });
+  try {
+    await db.query(
+      "INSERT INTO sessoes (usuario_id, duracao_seg) VALUES ($1, $2);",
+      [parseInt(usuario_id, 10), parseInt(duracao_seg, 10)]
+    );
+    return res.json({ ok: true });
+  } catch (err) {
+    return res.json({ ok: false });
+  }
 });
 
-// ── rota: tempo total de estudo ──────────────────────────────
-app.get("/tempo_total", (req, res) => {
+// ── rota: tempo total de estudo (Assíncrona) ──────────────────
+app.get("/tempo_total", async (req, res) => {
   const usuarioId = parseInt(req.query.usuario_id, 10);
 
   if (!usuarioId) {
     return res.json({ ok: false });
   }
 
-  const row = db
-    .prepare(
-      "SELECT COALESCE(SUM(duracao_seg),0) AS total, COUNT(*) AS sessoes FROM sessoes WHERE usuario_id = ?;"
-    )
-    .get(usuarioId);
+  try {
+    const result = await db.query(
+      "SELECT COALESCE(SUM(duracao_seg),0) AS total, COUNT(*) AS sessoes FROM sessoes WHERE usuario_id = $1;",
+      [usuarioId]
+    );
+    
+    const row = result.rows[0];
 
-  return res.json({
-    ok: true,
-    total_seg: row.total,
-    total_min: Math.floor(row.total / 60),
-    sessoes: row.sessoes,
-  });
+    return res.json({
+      ok: true,
+      total_seg: parseInt(row.total, 10),
+      total_min: Math.floor(parseInt(row.total, 10) / 60),
+      sessoes: parseInt(row.sessoes, 10),
+    });
+  } catch (err) {
+    return res.json({ ok: false });
+  }
 });
 
 // ── rota: proxy para a IA (Groq) ─────────────────────────────
@@ -177,12 +193,10 @@ app.post("/ia", async (req, res) => {
   }
 });
 
-// ── rota não encontrada ───────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({ ok: false, msg: "Erro" });
 });
 
-// ── inicialização ──────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`[SERVER] Servidor rodando na porta ${PORT}`);
 });
