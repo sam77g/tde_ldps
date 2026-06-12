@@ -76,7 +76,7 @@ Bash
 npm install express cors better-sqlite3
 ```
 
-(Ou simplesmente execute npm install caso o seu repositório possua o arquivo package.json configurado)
+
 
 Adicione sua chave de API da Groq às variáveis de ambiente do sistema (Opcional — necessário apenas se desejar usar as funções de assistência por IA localmente):
 
