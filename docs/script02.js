@@ -91,7 +91,7 @@ document.getElementById("btnEntrar").addEventListener("click", async () => {
             sessionStorage.setItem("usuario_id",   data.id);
             sessionStorage.setItem("usuario_nome",  data.nome);
             /* redireciona para o pomodoro */
-            window.location.href = "/pomodoro/pomodoro.html";
+            window.location.href = "pomodoro/pomodoro.html";
         } else {
             setMsg(loginForm, data.msg || "Credenciais incorretas.");
         }
